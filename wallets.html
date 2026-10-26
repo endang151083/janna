@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Janna Wallet — Wallets</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --green: #00c853; --bg: #070b07; --sidebar: #0d120d; --card: #111811; --text: #fff; --muted: #8a9a8a; --border: #1a2a1a; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+    .sidebar { width: 260px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 24px 16px; }
+    .logo-area { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; padding: 0 8px; }
+    .logo-img { width: 40px; height: 40px; background: var(--green); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #000; }
+    .logo-text { font-weight: 700; font-size: 1.2rem; }
+    .nav-item { padding: 12px 16px; border-radius: 8px; color: var(--muted); text-decoration: none; margin-bottom: 4px; display: flex; align-items: center; gap: 12px; }
+    .nav-item:hover, .nav-item.active { background: #1a2a1a; color: var(--green); }
+    .main { flex: 1; padding: 24px 32px; }
+    .btn { background: var(--green); color: #000; padding: 8px 16px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; text-decoration: none; font-size: 0.9rem; }
+    .btn-sm { padding: 4px 10px; font-size: 0.8rem; margin-left: 4px; }
+    .btn-danger { background: #c62828; color: #fff; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+    .wallet-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #0d140d; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 12px; }
+    .network-badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; background: #1a2a1a; color: var(--green); }
+    .muted { color: var(--muted); }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 1000; }
+    .modal.active { display: flex; }
+    .modal-content { background: var(--card); padding: 24px; border-radius: 12px; max-width: 500px; width: 90%; border: 1px solid var(--border); }
+    input { background: #0d140d; border: 1px solid var(--border); color: #fff; padding: 8px; border-radius: 6px; width: 100%; margin: 8px 0; }
+    @media (max-width: 900px) { body { flex-direction: column; } .sidebar { width: 100%; } }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo-area">
+      <div class="logo-img">J</div>
+      <div class="logo-text">Janna Wallet</div>
+    </div>
+    <a href="janna-wallet-dashboard.html" class="nav-item">🏠 Dashboard</a>
+    <a href="wallets.html" class="nav-item active">💼 Wallets</a>
+    <a href="swap.html" class="nav-item">🔄 Swap</a>
+    <a href="earn.html" class="nav-item">📈 Earn</a>
+    <a href="settings.html" class="nav-item">⚙️ Settings</a>
+  </aside>
+  <main class="main">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:32px;">
+      <div>
+        <h1 style="font-size:1.8rem;">Wallets</h1>
+        <p class="muted">Manage all multi-network wallets</p>
+      </div>
+      <a href="create-wallet.html" class="btn">+ Create New Wallet</a>
+      <a href="import-wallet.html" class="btn" style="margin-left:8px; background:transparent; border:1px solid var(--green); color:var(--green);">Import Wallet</a>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--green); margin-bottom:16px;">My Wallets</h3>
+      <div id="walletList"><p class="muted">Loading...</p></div>
+    </div>
+  </main>
+
+  <!-- Rename Modal -->
+  <div class="modal" id="renameModal">
+    <div class="modal-content">
+      <h3 style="color:var(--green); margin-bottom:12px;">Rename Wallet</h3>
+      <input type="text" id="renameInput" placeholder="New name">
+      <div style="margin-top:16px; text-align:right;">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn" onclick="confirmRename()" style="margin-left:8px;">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div class="modal" id="detailModal">
+    <div class="modal-content">
+      <h3 style="color:var(--green); margin-bottom:12px;">Wallet Details</h3>
+      <div id="detailContent"></div>
+      <button class="btn" onclick="closeModal()" style="margin-top:16px;">Close</button>
+    </div>
+  </div>
+
+  <script>
+    let wallets = [];
+    let renameIndex = -1;
+
+    function loadWallets() {
+      wallets = JSON.parse(localStorage.getItem('jannaWallets') || '[]');
+      if (wallets.length === 0) {
+        wallets = [
+          { name: "Main Wallet", eth: "0x4a7f3e2a1b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5", sol: "sol1x9k2...", canton: "", balance: "$2,480", nets: "ETH + SOL" },
+          { name: "Canton Private", eth: "", sol: "", canton: "ctn1q8k3m...", balance: "$890", nets: "Canton" },
+          { name: "Solana Daily", eth: "", sol: "sol1x9k2...", canton: "", balance: "$1,120", nets: "SOL" }
+        ];
+        localStorage.setItem('jannaWallets', JSON.stringify(wallets));
+      }
+      render();
+    }
+
+    function render() {
+      const container = document.getElementById('walletList');
+      if (wallets.length === 0) {
+        container.innerHTML = '<p class="muted">No wallets yet. Create one!</p>';
+        return;
+      }
+      let html = '';
+      wallets.forEach((w, i) => {
+        const addr = w.eth || w.sol || w.canton || '—';
+        const shortAddr = addr.length > 14 ? addr.slice(0,8) + '...' + addr.slice(-6) : addr;
+        html += `
+          <div class="wallet-item">
+            <div>
+              <strong>${w.name || 'Wallet'}</strong>
+              <div class="muted">${shortAddr}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:1.3rem; font-weight:700;">${w.balance || '$0'}</div>
+              <span class="network-badge">${w.nets || 'Multi'}</span>
+              <div style="margin-top:6px;">
+                <button class="btn btn-sm" onclick="viewDetail(${i})">Details</button>
+                <button class="btn btn-sm" onclick="renameWallet(${i})">Rename</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteWallet(${i})">Delete</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function renameWallet(i) {
+      renameIndex = i;
+      document.getElementById('renameInput').value = wallets[i].name;
+      document.getElementById('renameModal').classList.add('active');
+    }
+
+    function confirmRename() {
+      const newName = document.getElementById('renameInput').value.trim();
+      if (newName && renameIndex >= 0) {
+        wallets[renameIndex].name = newName;
+        localStorage.setItem('jannaWallets', JSON.stringify(wallets));
+        render();
+      }
+      closeModal();
+    }
+
+    function deleteWallet(i) {
+      if (confirm('Delete this wallet? This only removes it from the list (seed is not deleted from your device).')) {
+        wallets.splice(i, 1);
+        localStorage.setItem('jannaWallets', JSON.stringify(wallets));
+        render();
+      }
+    }
+
+    function viewDetail(i) {
+      const w = wallets[i];
+      let html = `<p><strong>Name:</strong> ${w.name}</p>`;
+      if (w.eth) html += `<p style="margin-top:8px;"><strong>Ethereum:</strong><br><span class="muted">${w.eth}</span></p>`;
+      if (w.sol) html += `<p style="margin-top:8px;"><strong>Solana:</strong><br><span class="muted">${w.sol}</span></p>`;
+      if (w.canton) html += `<p style="margin-top:8px;"><strong>Canton:</strong><br><span class="muted">${w.canton}</span></p>`;
+      html += `<p style="margin-top:12px;"><strong>Recent Transactions</strong></p>
+               <p class="muted">• Received 0.05 ETH — 2 days ago</p>
+               <p class="muted">• Sent 1.2 SOL — 5 days ago</p>
+               <p class="muted">• Swap ETH → SOL — 1 week ago</p>`;
+      document.getElementById('detailContent').innerHTML = html;
+      document.getElementById('detailModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+    }
+
+    loadWallets();
+  </script>
+</body>
+</html>
