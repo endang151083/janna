@@ -1,0 +1,58 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/janna-wallet-dashboard.html"
+    },
+    {
+      "src": "/dashboard",
+      "dest": "/janna-wallet-dashboard.html"
+    },
+    {
+      "src": "/wallets",
+      "dest": "/wallets.html"
+    },
+    {
+      "src": "/create",
+      "dest": "/create-wallet.html"
+    },
+    {
+      "src": "/import",
+      "dest": "/import-wallet.html"
+    },
+    {
+      "src": "/swap",
+      "dest": "/swap.html"
+    },
+    {
+      "src": "/earn",
+      "dest": "/earn.html"
+    },
+    {
+      "src": "/settings",
+      "dest": "/settings.html"
+    },
+    {
+      "src": "/landing",
+      "dest": "/janna-wallet-landing.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    }
+  ]
+}
