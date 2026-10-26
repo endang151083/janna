@@ -243,6 +243,16 @@
 
       let wallets = JSON.parse(localStorage.getItem('jannaWallets') || '[]');
 
+      // Remove old demo wallets
+      wallets = wallets.filter(w => 
+        !w.name?.includes('Main Wallet') && 
+        !w.name?.includes('Canton Private') && 
+        !w.name?.includes('Solana Daily') &&
+        !w.eth?.includes('0x4a7f3e2a1b9c') &&
+        !w.canton?.includes('ctn1q8k3m')
+      );
+      localStorage.setItem('jannaWallets', JSON.stringify(wallets));
+
       if (wallets.length === 0) {
         container.innerHTML = '<p class="muted">No wallets yet. Create or import one.</p>';
         totalEl.textContent = '$0.00';
