@@ -30,11 +30,11 @@
       <div class="logo-img">J</div>
       <div class="logo-text">Janna Wallet</div>
     </div>
-    <a href="janna-wallet-dashboard.html" class="nav-item">🏠 Dashboard</a>
-    <a href="wallets.html" class="nav-item">💼 Wallets</a>
-    <a href="swap.html" class="nav-item active">🔄 Swap</a>
-    <a href="earn.html" class="nav-item">📈 Earn</a>
-    <a href="settings.html" class="nav-item">⚙️ Settings</a>
+    <a href="/" class="nav-item">🏠 Dashboard</a>
+    <a href="/wallets" class="nav-item">💼 Wallets</a>
+    <a href="/swap" class="nav-item active">🔄 Swap</a>
+    <a href="/earn" class="nav-item">📈 Earn</a>
+    <a href="/settings" class="nav-item">⚙️ Settings</a>
   </aside>
   <main class="main">
     <h1 style="font-size:1.8rem; margin-bottom:8px;">Swap</h1>
@@ -43,28 +43,80 @@
       <div class="swap-row">
         <div class="muted" style="font-size:0.85rem; margin-bottom:8px;">From</div>
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <input type="text" value="0.5" placeholder="0.0">
-          <select id="fromToken"><option>ETH</option><option>SOL</option><option>CC</option></select>
+          <input type="number" id="fromAmount" value="1" placeholder="0.0" step="any" min="0">
+          <select id="fromToken">
+            <option value="ETH">ETH</option>
+            <option value="SOL">SOL</option>
+            <option value="CC">CC</option>
+          </select>
         </div>
       </div>
       <div style="text-align:center; margin:8px 0; color:var(--green);">↓</div>
       <div class="swap-row">
         <div class="muted" style="font-size:0.85rem; margin-bottom:8px;">To</div>
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <input type="text" value="12.4" placeholder="0.0" readonly>
-          <select id="toToken"><option>SOL</option><option>ETH</option><option>CC</option></select>
+          <input type="text" id="toAmount" value="0" placeholder="0.0" readonly>
+          <select id="toToken">
+            <option value="SOL">SOL</option>
+            <option value="ETH">ETH</option>
+            <option value="CC">CC</option>
+          </select>
         </div>
       </div>
-      <p class="muted" style="font-size:0.85rem; margin:12px 0;">Rate: 1 ETH ≈ 24.8 SOL</p>
-      <button class="btn" onclick="alert('Swap successful (demo)')">Swap Now</button>
+      <p class="muted" style="font-size:0.85rem; margin:12px 0;" id="rateDisplay">Fetching rate...</p>
+      <button class="btn" onclick="doSwap()">Swap Now</button>
     </div>
   </main>
-    <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
-    <script>
-      // Load wallets for potential sync (demo)
-      const wallets = JSON.parse(localStorage.getItem('jannaWallets') || '[]');
-      if (wallets.length > 0) {
-        console.log('Synced wallets for swap:', wallets.length);
+
+  <script>
+    let prices = { ETH: 0, SOL: 0, CC: 0 };
+
+    async function fetchPrices() {
+      try {
+        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,solana&vs_currencies=usd');
+        const data = await res.json();
+        prices.ETH = data.ethereum?.usd || 2500;
+        prices.SOL = data.solana?.usd || 150;
+        prices.CC = 0.5; // Placeholder for Canton (no public price yet)
+        updateRate();
+      } catch (e) {
+        console.error('Price fetch failed', e);
+        prices = { ETH: 2500, SOL: 150, CC: 0.5 };
+        updateRate();
       }
-    </script>
+    }
+
+    function updateRate() {
+      const from = document.getElementById('fromToken').value;
+      const to = document.getElementById('toToken').value;
+      const amount = parseFloat(document.getElementById('fromAmount').value) || 0;
+
+      if (from === to) {
+        document.getElementById('toAmount').value = amount.toFixed(4);
+        document.getElementById('rateDisplay').textContent = 'Same token';
+        return;
+      }
+
+      const fromUsd = (prices[from] || 1) * amount;
+      const toAmount = fromUsd / (prices[to] || 1);
+      document.getElementById('toAmount').value = toAmount.toFixed(4);
+      const rate = (prices[from] || 1) / (prices[to] || 1);
+      document.getElementById('rateDisplay').textContent = `Rate: 1 ${from} ≈ ${rate.toFixed(4)} ${to} (live)`;
+    }
+
+    function doSwap() {
+      const from = document.getElementById('fromToken').value;
+      const to = document.getElementById('toToken').value;
+      const amount = document.getElementById('fromAmount').value;
+      const received = document.getElementById('toAmount').value;
+      alert(`Swap demo: ${amount} ${from} → ${received} ${to}\\n(Connect wallet to execute real swap)`);
+    }
+
+    document.getElementById('fromAmount').addEventListener('input', updateRate);
+    document.getElementById('fromToken').addEventListener('change', updateRate);
+    document.getElementById('toToken').addEventListener('change', updateRate);
+
+    fetchPrices();
+  </script>
+</body>
 </html>
