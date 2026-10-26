@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Janna Wallet — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #00c853;
+      --green-dark: #009624;
+      --green-light: #69f0ae;
+      --bg: #070b07;
+      --sidebar: #0d120d;
+      --card: #111811;
+      --text: #ffffff;
+      --muted: #8a9a8a;
+      --border: #1a2a1a;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 260px;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+    }
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 40px;
+      padding: 0 8px;
+    }
+    .logo-img {
+      width: 40px;
+      height: 40px;
+      background: var(--green);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #000;
+      font-size: 1.2rem;
+    }
+    .logo-text { font-weight: 700; font-size: 1.2rem; }
+    .nav-item {
+      padding: 12px 16px;
+      border-radius: 8px;
+      color: var(--muted);
+      text-decoration: none;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s;
+    }
+    .nav-item:hover, .nav-item.active {
+      background: #1a2a1a;
+      color: var(--green);
+    }
+    .main {
+      flex: 1;
+      padding: 24px 32px;
+      overflow-y: auto;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+    .btn {
+      background: var(--green);
+      color: #000;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn:hover { background: var(--green-light); }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--green);
+      color: var(--green);
+    }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .card h3 { margin-bottom: 16px; font-size: 1.1rem; color: var(--green); }
+    .wallet-list { display: flex; flex-direction: column; gap: 12px; }
+    .wallet-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: #0d140d;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .network-badge {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: #1a2a1a;
+      color: var(--green);
+    }
+    .create-wallet {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .network-select {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin: 24px 0;
+      flex-wrap: wrap;
+    }
+    .net-option {
+      padding: 12px 20px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .net-option:hover, .net-option.selected {
+      border-color: var(--green);
+      background: #0d1f0d;
+    }
+    .balance { font-size: 1.8rem; font-weight: 700; }
+    .muted { color: var(--muted); font-size: 0.9rem; }
+    @media (max-width: 900px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo-area">
+      <div class="logo-img">J</div>
+      <div class="logo-text">Janna Wallet</div>
+    </div>
+    <a href="/" class="nav-item active">🏠 Dashboard</a>
+    <a href="/wallets" class="nav-item">💼 Wallets</a>
+    <a href="/swap" class="nav-item">🔄 Swap</a>
+    <a href="/earn" class="nav-item">📈 Earn</a>
+    <a href="/settings" class="nav-item">⚙️ Settings</a>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1 style="font-size: 1.8rem;">Dashboard</h1>
+        <p class="muted">Multi-network: Ethereum • Solana • Canton</p>
+      </div>
+      <div>
+        <a href="/create" class="btn">+ Create New Wallet</a>
+        <a href="/import" class="btn" style="margin-left:8px;">Import</a>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <div>
+        <div class="card">
+          <h3>Explore Networks</h3>
+          <div class="wallet-list">
+            <a href="https://etherscan.io" target="_blank" class="wallet-item" style="text-decoration:none; color:inherit;">
+              <div>
+                <strong>Ethereum</strong>
+                <div class="muted">Etherscan Explorer</div>
+              </div>
+              <div style="text-align: right;">
+                <span class="network-badge">ETH</span>
+              </div>
+            </a>
+            <a href="https://solscan.io" target="_blank" class="wallet-item" style="text-decoration:none; color:inherit;">
+              <div>
+                <strong>Solana</strong>
+                <div class="muted">Solscan Explorer</div>
+              </div>
+              <div style="text-align: right;">
+                <span class="network-badge">SOL</span>
+              </div>
+            </a>
+            <a href="https://www.canton.network" target="_blank" class="wallet-item" style="text-decoration:none; color:inherit;">
+              <div>
+                <strong>Canton</strong>
+                <div class="muted">Canton Network</div>
+              </div>
+              <div style="text-align: right;">
+                <span class="network-badge">Canton</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <h3>Total Balance</h3>
+          <div class="balance" id="totalBalance">$0.00</div>
+          <p class="muted" id="balanceChange">Syncing...</p>
+        </div>
+        <div class="card">
+          <h3>Quick Actions</h3>
+          <button class="btn" style="width: 100%; margin-bottom: 8px;">Send</button>
+          <button class="btn btn-outline" style="width: 100%; margin-bottom: 8px;">Receive</button>
+          <button class="btn btn-outline" style="width: 100%;">Swap</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
+  <script>
+    async function loadAndSyncWallets() {
+      const container = document.getElementById('walletList');
+      const totalEl = document.getElementById('totalBalance');
+      const changeEl = document.getElementById('balanceChange');
+
+      let wallets = JSON.parse(localStorage.getItem('jannaWallets') || '[]');
+
+      // Remove old demo wallets
+      wallets = wallets.filter(w => 
+        !w.name?.includes('Main Wallet') && 
+        !w.name?.includes('Canton Private') && 
+        !w.name?.includes('Solana Daily') &&
+        !w.eth?.includes('0x4a7f3e2a1b9c') &&
+        !w.canton?.includes('ctn1q8k3m')
+      );
+      localStorage.setItem('jannaWallets', JSON.stringify(wallets));
+
+      if (wallets.length === 0) {
+        container.innerHTML = '<p class="muted">No wallets yet. Create or import one.</p>';
+        totalEl.textContent = '$0.00';
+        changeEl.textContent = 'Add a wallet to see balance';
+        return;
+      }
+
+      let totalUsd = 0;
+      let html = '';
+      const provider = typeof ethers !== 'undefined' 
+        ? new ethers.JsonRpcProvider("https://cloudflare-eth.com") 
+        : null;
+
+      for (const w of wallets) {
+        let ethBal = 0;
+        let displayBal = w.balance || '$0';
+
+        if (provider && w.eth && w.eth.startsWith('0x')) {
+          try {
+            const balWei = await provider.getBalance(w.eth);
+            ethBal = parseFloat(ethers.formatEther(balWei));
+            // Rough ETH price estimate for demo (can be replaced with API)
+            const ethPrice = 2500;
+            const usd = ethBal * ethPrice;
+            totalUsd += usd;
+            displayBal = ethBal.toFixed(4) + ' ETH (~$' + usd.toFixed(0) + ')';
+            w.balance = displayBal;
+          } catch (e) {
+            displayBal = 'Balance unavailable';
+          }
+        }
+
+        const addr = w.eth || w.sol || w.canton || '—';
+        const shortAddr = addr.length > 14 ? addr.slice(0,8) + '...' + addr.slice(-6) : addr;
+        const nets = w.nets || (w.eth ? 'ETH ' : '') + (w.sol ? 'SOL ' : '') + (w.canton ? 'Canton' : '');
+
+        html += `
+          <div class="wallet-item">
+            <div>
+              <strong>${w.name || 'Wallet'}</strong>
+              <div class="muted">${shortAddr}</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-weight:600;">${displayBal}</div>
+              <span class="network-badge">${nets.trim() || 'Multi'}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+      totalEl.textContent = '$' + totalUsd.toFixed(2);
+      changeEl.textContent = wallets.length + ' wallet(s) synced';
+
+      // Save updated balances back
+      localStorage.setItem('jannaWallets', JSON.stringify(wallets));
+    }
+
+    loadAndSyncWallets();
+  </script>
+</body>
+</html>
