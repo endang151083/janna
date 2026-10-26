@@ -84,7 +84,20 @@
     let renameIndex = -1;
 
     async function loadWallets() {
-      wallets = JSON.parse(localStorage.getItem('jannaWallets') || '[]');
+      let stored = JSON.parse(localStorage.getItem('jannaWallets') || '[]');
+
+      // Remove old demo wallets
+      stored = stored.filter(w => 
+        !w.name?.includes('Main Wallet') && 
+        !w.name?.includes('Canton Private') && 
+        !w.name?.includes('Solana Daily') &&
+        !w.eth?.includes('0x4a7f3e2a1b9c') &&
+        !w.canton?.includes('ctn1q8k3m')
+      );
+
+      localStorage.setItem('jannaWallets', JSON.stringify(stored));
+      wallets = stored;
+
       if (wallets.length === 0) {
         document.getElementById('walletList').innerHTML = '<p class="muted">No wallets yet. Create or import one!</p>';
         return;
@@ -105,7 +118,6 @@
             w.balance = w.balance || 'Balance unavailable';
           }
         }
-        // Update nets to use CC if needed
         if (w.nets && w.nets.includes('Canton')) {
           w.nets = w.nets.replace('Canton', 'CC');
         }
