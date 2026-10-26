@@ -185,20 +185,44 @@
     <div class="dashboard-grid">
       <div>
         <div class="card">
-          <h3>My Wallets</h3>
-          <div class="wallet-list" id="walletList">
-            <p class="muted">Loading...</p>
+          <h3>Explore Networks</h3>
+          <div class="wallet-list">
+            <a href="https://etherscan.io" target="_blank" class="wallet-item" style="text-decoration:none; color:inherit;">
+              <div>
+                <strong>Ethereum</strong>
+                <div class="muted">Etherscan Explorer</div>
+              </div>
+              <div style="text-align: right;">
+                <span class="network-badge">ETH</span>
+              </div>
+            </a>
+            <a href="https://solscan.io" target="_blank" class="wallet-item" style="text-decoration:none; color:inherit;">
+              <div>
+                <strong>Solana</strong>
+                <div class="muted">Solscan Explorer</div>
+              </div>
+              <div style="text-align: right;">
+                <span class="network-badge">SOL</span>
+              </div>
+            </a>
+            <a href="https://www.canton.network" target="_blank" class="wallet-item" style="text-decoration:none; color:inherit;">
+              <div>
+                <strong>Canton</strong>
+                <div class="muted">Canton Network</div>
+              </div>
+              <div style="text-align: right;">
+                <span class="network-badge">Canton</span>
+              </div>
+            </a>
           </div>
         </div>
-
-        <!-- Create section removed - now uses dedicated page -->
       </div>
 
       <div>
         <div class="card">
           <h3>Total Balance</h3>
-          <div class="balance">$3,370</div>
-          <p class="muted">+4.2% (24h)</p>
+          <div class="balance" id="totalBalance">$0.00</div>
+          <p class="muted" id="balanceChange">Syncing...</p>
         </div>
         <div class="card">
           <h3>Quick Actions</h3>
@@ -210,20 +234,51 @@
     </div>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
   <script>
-    function loadDashboardWallets() {
+    async function loadAndSyncWallets() {
       const container = document.getElementById('walletList');
+      const totalEl = document.getElementById('totalBalance');
+      const changeEl = document.getElementById('balanceChange');
+
       let wallets = JSON.parse(localStorage.getItem('jannaWallets') || '[]');
+
       if (wallets.length === 0) {
-        wallets = [
-          { name: "Main Wallet", eth: "0x4a7...f3e2", balance: "$2,480", nets: "ETH + SOL" },
-          { name: "Canton Private", canton: "ctn1q...8k3m", balance: "$890", nets: "Canton" }
-        ];
+        container.innerHTML = '<p class="muted">No wallets yet. Create or import one.</p>';
+        totalEl.textContent = '$0.00';
+        changeEl.textContent = 'Add a wallet to see balance';
+        return;
       }
+
+      let totalUsd = 0;
       let html = '';
-      wallets.slice(0, 3).forEach(w => {
+      const provider = typeof ethers !== 'undefined' 
+        ? new ethers.JsonRpcProvider("https://cloudflare-eth.com") 
+        : null;
+
+      for (const w of wallets) {
+        let ethBal = 0;
+        let displayBal = w.balance || '$0';
+
+        if (provider && w.eth && w.eth.startsWith('0x')) {
+          try {
+            const balWei = await provider.getBalance(w.eth);
+            ethBal = parseFloat(ethers.formatEther(balWei));
+            // Rough ETH price estimate for demo (can be replaced with API)
+            const ethPrice = 2500;
+            const usd = ethBal * ethPrice;
+            totalUsd += usd;
+            displayBal = ethBal.toFixed(4) + ' ETH (~$' + usd.toFixed(0) + ')';
+            w.balance = displayBal;
+          } catch (e) {
+            displayBal = 'Balance unavailable';
+          }
+        }
+
         const addr = w.eth || w.sol || w.canton || '—';
-        const shortAddr = addr.length > 12 ? addr.slice(0,6) + '...' + addr.slice(-4) : addr;
+        const shortAddr = addr.length > 14 ? addr.slice(0,8) + '...' + addr.slice(-6) : addr;
+        const nets = w.nets || (w.eth ? 'ETH ' : '') + (w.sol ? 'SOL ' : '') + (w.canton ? 'Canton' : '');
+
         html += `
           <div class="wallet-item">
             <div>
@@ -231,15 +286,22 @@
               <div class="muted">${shortAddr}</div>
             </div>
             <div style="text-align: right;">
-              <div class="balance">${w.balance || '$0'}</div>
-              <span class="network-badge">${w.nets || 'Multi'}</span>
+              <div style="font-weight:600;">${displayBal}</div>
+              <span class="network-badge">${nets.trim() || 'Multi'}</span>
             </div>
           </div>
         `;
-      });
+      }
+
       container.innerHTML = html;
+      totalEl.textContent = '$' + totalUsd.toFixed(2);
+      changeEl.textContent = wallets.length + ' wallet(s) synced';
+
+      // Save updated balances back
+      localStorage.setItem('jannaWallets', JSON.stringify(wallets));
     }
-    loadDashboardWallets();
+
+    loadAndSyncWallets();
   </script>
 </body>
 </html>
