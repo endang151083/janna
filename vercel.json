@@ -1,17 +1,13 @@
 {
-  "version": 2,
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "routes": [
-    { "src": "/", "dest": "/janna-wallet-dashboard.html" },
-    { "src": "/dashboard", "dest": "/janna-wallet-dashboard.html" },
-    { "src": "/wallets", "dest": "/wallets.html" },
-    { "src": "/create", "dest": "/create-wallet.html" },
-    { "src": "/import", "dest": "/import-wallet.html" },
-    { "src": "/swap", "dest": "/swap.html" },
-    { "src": "/earn", "dest": "/earn.html" },
-    { "src": "/settings", "dest": "/settings.html" },
-    { "src": "/landing", "dest": "/janna-wallet-landing.html" },
-    { "src": "/(.*\\.html)", "dest": "/$1" }
+  "rewrites": [
+    { "source": "/", "destination": "/janna-wallet-dashboard.html" },
+    { "source": "/dashboard", "destination": "/janna-wallet-dashboard.html" },
+    { "source": "/wallets", "destination": "/wallets.html" },
+    { "source": "/create", "destination": "/create-wallet.html" },
+    { "source": "/import", "destination": "/import-wallet.html" },
+    { "source": "/swap", "destination": "/swap.html" },
+    { "source": "/earn", "destination": "/earn.html" },
+    { "source": "/settings", "destination": "/settings.html" },
+    { "source": "/landing", "destination": "/janna-wallet-landing.html" }
   ]
 }
