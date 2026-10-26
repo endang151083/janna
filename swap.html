@@ -44,7 +44,7 @@
         <div class="muted" style="font-size:0.85rem; margin-bottom:8px;">From</div>
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <input type="text" value="0.5" placeholder="0.0">
-          <select><option>ETH</option><option>SOL</option><option>CTN</option></select>
+          <select id="fromToken"><option>ETH</option><option>SOL</option><option>CC</option></select>
         </div>
       </div>
       <div style="text-align:center; margin:8px 0; color:var(--green);">↓</div>
@@ -52,12 +52,19 @@
         <div class="muted" style="font-size:0.85rem; margin-bottom:8px;">To</div>
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <input type="text" value="12.4" placeholder="0.0" readonly>
-          <select><option>SOL</option><option>ETH</option><option>CTN</option></select>
+          <select id="toToken"><option>SOL</option><option>ETH</option><option>CC</option></select>
         </div>
       </div>
       <p class="muted" style="font-size:0.85rem; margin:12px 0;">Rate: 1 ETH ≈ 24.8 SOL</p>
       <button class="btn" onclick="alert('Swap successful (demo)')">Swap Now</button>
     </div>
   </main>
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
+    <script>
+      // Load wallets for potential sync (demo)
+      const wallets = JSON.parse(localStorage.getItem('jannaWallets') || '[]');
+      if (wallets.length > 0) {
+        console.log('Synced wallets for swap:', wallets.length);
+      }
+    </script>
 </html>
