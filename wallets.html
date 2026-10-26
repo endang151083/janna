@@ -78,20 +78,39 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
   <script>
     let wallets = [];
     let renameIndex = -1;
 
-    function loadWallets() {
+    async function loadWallets() {
       wallets = JSON.parse(localStorage.getItem('jannaWallets') || '[]');
       if (wallets.length === 0) {
-        wallets = [
-          { name: "Main Wallet", eth: "0x4a7f3e2a1b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5", sol: "sol1x9k2...", canton: "", balance: "$2,480", nets: "ETH + SOL" },
-          { name: "Canton Private", eth: "", sol: "", canton: "ctn1q8k3m...", balance: "$890", nets: "Canton" },
-          { name: "Solana Daily", eth: "", sol: "sol1x9k2...", canton: "", balance: "$1,120", nets: "SOL" }
-        ];
-        localStorage.setItem('jannaWallets', JSON.stringify(wallets));
+        document.getElementById('walletList').innerHTML = '<p class="muted">No wallets yet. Create or import one!</p>';
+        return;
       }
+
+      const provider = typeof ethers !== 'undefined' 
+        ? new ethers.JsonRpcProvider("https://cloudflare-eth.com") 
+        : null;
+
+      for (const w of wallets) {
+        if (provider && w.eth && w.eth.startsWith('0x') && w.eth.length > 20) {
+          try {
+            const balWei = await provider.getBalance(w.eth);
+            const ethBal = parseFloat(ethers.formatEther(balWei));
+            const usd = ethBal * 2500;
+            w.balance = ethBal.toFixed(4) + ' ETH (~$' + usd.toFixed(0) + ')';
+          } catch (e) {
+            w.balance = w.balance || 'Balance unavailable';
+          }
+        }
+        // Update nets to use CC if needed
+        if (w.nets && w.nets.includes('Canton')) {
+          w.nets = w.nets.replace('Canton', 'CC');
+        }
+      }
+      localStorage.setItem('jannaWallets', JSON.stringify(wallets));
       render();
     }
 
