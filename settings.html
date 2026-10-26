@@ -20,6 +20,13 @@
     .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); }
     .setting-row:last-child { border-bottom: none; }
     .muted { color: var(--muted); }
+    .action { color: var(--green); cursor: pointer; font-weight: 500; }
+    .action:hover { text-decoration: underline; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 1000; }
+    .modal.active { display: flex; }
+    .modal-content { background: var(--card); padding: 24px; border-radius: 12px; max-width: 420px; width: 90%; border: 1px solid var(--border); }
+    .btn { background: var(--green); color: #000; padding: 8px 16px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; }
+    select, input { background: #0d140d; border: 1px solid var(--border); color: #fff; padding: 8px; border-radius: 6px; width: 100%; margin: 8px 0; }
     @media (max-width: 900px) { body { flex-direction: column; } .sidebar { width: 100%; } }
   </style>
 </head>
@@ -29,33 +36,131 @@
       <div class="logo-img">J</div>
       <div class="logo-text">Janna Wallet</div>
     </div>
-    <a href="janna-wallet-dashboard.html" class="nav-item">🏠 Dashboard</a>
-    <a href="wallets.html" class="nav-item">💼 Wallets</a>
-    <a href="swap.html" class="nav-item">🔄 Swap</a>
-    <a href="earn.html" class="nav-item">📈 Earn</a>
-    <a href="settings.html" class="nav-item active">⚙️ Settings</a>
+    <a href="/" class="nav-item">🏠 Dashboard</a>
+    <a href="/wallets" class="nav-item">💼 Wallets</a>
+    <a href="/swap" class="nav-item">🔄 Swap</a>
+    <a href="/earn" class="nav-item">📈 Earn</a>
+    <a href="/settings" class="nav-item active">⚙️ Settings</a>
   </aside>
   <main class="main">
     <h1 style="font-size:1.8rem; margin-bottom:8px;">Settings</h1>
     <p class="muted" style="margin-bottom:32px;">Account and security settings</p>
     <div class="card">
       <div class="setting-row">
-        <div><strong>Language</strong><div class="muted">English</div></div>
-        <span style="color:var(--green);">Change</span>
+        <div><strong>Language</strong><div class="muted" id="langDisplay">English</div></div>
+        <span class="action" onclick="openModal('langModal')">Change</span>
       </div>
       <div class="setting-row">
-        <div><strong>Theme</strong><div class="muted">Dark Green</div></div>
-        <span style="color:var(--green);">Change</span>
+        <div><strong>Theme</strong><div class="muted" id="themeDisplay">Dark Green</div></div>
+        <span class="action" onclick="openModal('themeModal')">Change</span>
       </div>
       <div class="setting-row">
         <div><strong>Security</strong><div class="muted">Seed phrase & biometrics</div></div>
-        <span style="color:var(--green);">Manage</span>
+        <span class="action" onclick="openModal('securityModal')">Manage</span>
       </div>
       <div class="setting-row">
-        <div><strong>Default Networks</strong><div class="muted">Ethereum, Solana, Canton</div></div>
-        <span style="color:var(--green);">Edit</span>
+        <div><strong>Default Networks</strong><div class="muted" id="netDisplay">Ethereum, Solana, Canton</div></div>
+        <span class="action" onclick="openModal('netModal')">Edit</span>
       </div>
     </div>
   </main>
+
+  <!-- Language Modal -->
+  <div class="modal" id="langModal">
+    <div class="modal-content">
+      <h3 style="color:var(--green); margin-bottom:12px;">Change Language</h3>
+      <select id="langSelect">
+        <option value="English">English</option>
+        <option value="Indonesian">Indonesian</option>
+      </select>
+      <div style="margin-top:16px; text-align:right;">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn" onclick="saveLang()" style="margin-left:8px;">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Theme Modal -->
+  <div class="modal" id="themeModal">
+    <div class="modal-content">
+      <h3 style="color:var(--green); margin-bottom:12px;">Change Theme</h3>
+      <select id="themeSelect">
+        <option value="Dark Green">Dark Green</option>
+        <option value="Dark">Dark</option>
+        <option value="Light">Light (coming soon)</option>
+      </select>
+      <div style="margin-top:16px; text-align:right;">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn" onclick="saveTheme()" style="margin-left:8px;">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Security Modal -->
+  <div class="modal" id="securityModal">
+    <div class="modal-content">
+      <h3 style="color:var(--green); margin-bottom:12px;">Security</h3>
+      <p class="muted" style="margin-bottom:12px;">Manage your seed phrases and security options.</p>
+      <p>• Seed phrases are stored locally in your browser only.</p>
+      <p>• Never share your seed phrase or private key.</p>
+      <p>• Biometrics support coming soon.</p>
+      <div style="margin-top:16px; text-align:right;">
+        <button class="btn" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Networks Modal -->
+  <div class="modal" id="netModal">
+    <div class="modal-content">
+      <h3 style="color:var(--green); margin-bottom:12px;">Default Networks</h3>
+      <label><input type="checkbox" id="netEth" checked> Ethereum</label><br>
+      <label><input type="checkbox" id="netSol" checked> Solana</label><br>
+      <label><input type="checkbox" id="netCC" checked> Canton (CC)</label>
+      <div style="margin-top:16px; text-align:right;">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn" onclick="saveNetworks()" style="margin-left:8px;">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openModal(id) {
+      document.getElementById(id).classList.add('active');
+    }
+    function closeModal() {
+      document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+    }
+
+    function saveLang() {
+      const val = document.getElementById('langSelect').value;
+      document.getElementById('langDisplay').textContent = val;
+      localStorage.setItem('jannaLang', val);
+      closeModal();
+    }
+
+    function saveTheme() {
+      const val = document.getElementById('themeSelect').value;
+      document.getElementById('themeDisplay').textContent = val;
+      localStorage.setItem('jannaTheme', val);
+      closeModal();
+    }
+
+    function saveNetworks() {
+      const nets = [];
+      if (document.getElementById('netEth').checked) nets.push('Ethereum');
+      if (document.getElementById('netSol').checked) nets.push('Solana');
+      if (document.getElementById('netCC').checked) nets.push('Canton');
+      const text = nets.join(', ') || 'None';
+      document.getElementById('netDisplay').textContent = text;
+      localStorage.setItem('jannaNetworks', text);
+      closeModal();
+    }
+
+    // Load saved preferences
+    document.getElementById('langDisplay').textContent = localStorage.getItem('jannaLang') || 'English';
+    document.getElementById('themeDisplay').textContent = localStorage.getItem('jannaTheme') || 'Dark Green';
+    document.getElementById('netDisplay').textContent = localStorage.getItem('jannaNetworks') || 'Ethereum, Solana, Canton';
+  </script>
 </body>
 </html>
